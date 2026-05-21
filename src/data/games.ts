@@ -1,0 +1,58 @@
+import { Game } from "@/types";
+
+export const games: Game[] = [
+  {
+    id: "horny-dungeon",
+    title: "Horny Dungeon: Rescue the Princess",
+    description: "Explore 200+ levels of totally family-friendly dungeon crawling. The princess is in another castle. Probably.",
+    tags: ["Safe Download", "Popular"],
+    rating: 4.8,
+    downloadCount: 142337,
+    gradient: "from-purple-600 via-pink-500 to-orange-400",
+  },
+  {
+    id: "tactical-waifu",
+    title: "Tactical Waifu: Floor is Lava",
+    description: "Strategically deploy anime companions while avoiding the floor. Rated E for Everyone (we promise).",
+    tags: ["Community Verified", "Trending"],
+    rating: 4.6,
+    downloadCount: 89241,
+    gradient: "from-cyan-500 via-blue-600 to-indigo-900",
+  },
+  {
+    id: "neon-slime-party",
+    title: "Neon Slime Party.exe",
+    description: "Collect colorful slimes in a vibrant cyberpunk world. 100% genuine executable entertainment.",
+    tags: ["No Fake Installer", "Safe Download"],
+    rating: 4.3,
+    downloadCount: 67312,
+    gradient: "from-green-400 via-emerald-500 to-teal-700",
+  },
+  {
+    id: "cuddle-quest",
+    title: "Cuddle Quest: Pillow Revenge",
+    description: "A heartwarming tale of pillows seeking vengeance. Critics call it 'surprisingly not malware'.",
+    tags: ["Community Verified", "Popular"],
+    rating: 4.9,
+    downloadCount: 204891,
+    gradient: "from-pink-300 via-rose-400 to-red-600",
+  },
+  {
+    id: "not-ransomware",
+    title: "Definitely Not a Ransomware Sim",
+    description: "The most realistic simulation of not encrypting your files. Awarded 'Least Suspicious App 2024'.",
+    tags: ["No Fake Installer", "Safe Download"],
+    rating: 4.7,
+    downloadCount: 156789,
+    gradient: "from-yellow-300 via-amber-500 to-orange-700",
+  },
+  {
+    id: "waifu-tycoon",
+    title: "Waifu Tycoon: Malware-Free Edition",
+    description: "Build your anime empire without the bloatware. Our installers have more integrity than most CEOs.",
+    tags: ["Safe Download", "Trending"],
+    rating: 4.5,
+    downloadCount: 112456,
+    gradient: "from-fuchsia-500 via-purple-600 to-violet-900",
+  },
+];
