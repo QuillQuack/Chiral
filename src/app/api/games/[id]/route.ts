@@ -1,19 +1,20 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isAdmin } from "@/lib/roles";
 
 export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session || session.user?.role !== "ADMIN") {
+  if (!session || !isAdmin(session.user?.role || "")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
   try {
     const { id } = await params;
-    const { title, description, tags, rating, downloadCount, coverData } =
+    const { title, description, tags, coverData } =
       await req.json();
 
     const game = await prisma.game.update({
@@ -22,8 +23,6 @@ export async function PUT(
         title,
         description,
         tags: JSON.stringify(tags || []),
-        rating: typeof rating === "number" ? rating : 0,
-        downloadCount: typeof downloadCount === "number" ? downloadCount : 0,
         coverData: coverData ?? undefined,
       },
     });
@@ -53,7 +52,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session || session.user?.role !== "ADMIN") {
+  if (!session || !isAdmin(session.user?.role || "")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 

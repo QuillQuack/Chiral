@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { isAdmin } from "@/lib/roles";
 
 interface User {
   id: string;
@@ -27,7 +28,7 @@ export default function AdminPage() {
       router.push("/login");
       return;
     }
-    if (status === "authenticated" && session?.user?.role !== "ADMIN") {
+    if (status === "authenticated" && !isAdmin(session?.user?.role || "")) {
       router.push("/");
       return;
     }

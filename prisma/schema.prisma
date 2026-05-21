@@ -142,3 +142,12 @@ model FileScan {
   gameId String @unique
   game   Game   @relation(fields: [gameId], references: [id])
 }
+
+model PageVisit {
+  id        String   @id @default(cuid())
+  url       String
+  ip        String?
+  userId    String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}

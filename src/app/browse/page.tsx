@@ -5,7 +5,7 @@ import { GameData } from "@/types";
 import GameCard from "@/components/GameCard";
 import Navbar from "@/components/Navbar";
 
-const ALL_TAGS = ["Safe Download", "Community Verified", "No Fake Installer", "Popular", "Trending"];
+const ALL_TAGS = ["2D", "3D", "Interspecies Sex", "Visual Novel", "JRPG", "Action", "Adventure", "Puzzle", "Simulation", "RPG", "Strategy", "Sandbox", "Horror", "Dating Sim", "Management", "Comedy"];
 
 function debounce<T extends (...args: string[]) => void>(fn: T, ms: number) {
   let timer: ReturnType<typeof setTimeout>;

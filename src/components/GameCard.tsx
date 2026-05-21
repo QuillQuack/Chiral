@@ -6,6 +6,15 @@ import Image from "next/image";
 import SafetyBadge from "./SafetyBadge";
 import ReportModal from "./ReportModal";
 
+const TAG_COLORS = [
+  "bg-accent-pink/10 text-accent-pink border-accent-pink/20",
+  "bg-accent-cyan/10 text-accent-cyan border-accent-cyan/20",
+  "bg-green-500/10 text-green-400 border-green-500/20",
+  "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+  "bg-blue-500/10 text-blue-400 border-blue-500/20",
+];
+
 interface GameCardProps {
   game: GameData;
 }
@@ -58,15 +67,7 @@ export default function GameCard({ game }: GameCardProps) {
               {game.tags.map((tag) => (
                 <span
                   key={tag}
-                  className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                    tag === "Safe Download"
-                      ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                      : tag === "Community Verified"
-                      ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                      : tag === "No Fake Installer"
-                      ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
-                      : "bg-accent-pink/10 text-accent-pink border border-accent-pink/20"
-                  }`}
+                  className={`text-xs px-2.5 py-1 rounded-full font-medium border ${TAG_COLORS[game.tags.indexOf(tag) % TAG_COLORS.length]}`}
                 >
                   {tag}
                 </span>

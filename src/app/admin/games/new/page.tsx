@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-const ALL_TAGS = ["Safe Download", "Community Verified", "No Fake Installer", "Popular", "Trending"];
+const ALL_TAGS = ["2D", "3D", "Interspecies Sex", "Visual Novel", "JRPG", "Action", "Adventure", "Puzzle", "Simulation", "RPG", "Strategy", "Sandbox", "Horror", "Dating Sim", "Management", "Comedy"];
 
 export default function UploadGamePage() {
   const { status } = useSession();
@@ -14,8 +14,6 @@ export default function UploadGamePage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [rating, setRating] = useState(0);
-  const [downloadCount, setDownloadCount] = useState(0);
   const [coverData, setCoverData] = useState<string | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -62,8 +60,6 @@ export default function UploadGamePage() {
           title,
           description,
           tags: selectedTags,
-          rating,
-          downloadCount,
           coverData,
         }),
       });
@@ -150,31 +146,6 @@ export default function UploadGamePage() {
                   {tag}
                 </button>
               ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-text-secondary text-sm font-medium mb-2">Rating (0-5)</label>
-              <input
-                type="number"
-                step="0.1"
-                min="0"
-                max="5"
-                value={rating}
-                onChange={(e) => setRating(parseFloat(e.target.value) || 0)}
-                className="w-full bg-dark-bg border border-white/10 rounded-xl px-4 py-3 text-text-primary focus:outline-none focus:border-accent-cyan/50"
-              />
-            </div>
-            <div>
-              <label className="block text-text-secondary text-sm font-medium mb-2">Download Count</label>
-              <input
-                type="number"
-                min="0"
-                value={downloadCount}
-                onChange={(e) => setDownloadCount(parseInt(e.target.value) || 0)}
-                className="w-full bg-dark-bg border border-white/10 rounded-xl px-4 py-3 text-text-primary focus:outline-none focus:border-accent-cyan/50"
-              />
             </div>
           </div>
 

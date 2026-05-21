@@ -42,6 +42,40 @@ async function main() {
   } else {
     console.log("Demo user already exists");
   }
+
+  const ownerEmail = "owner@chiral.com";
+  const existingOwner = await prisma.user.findUnique({ where: { email: ownerEmail } });
+
+  if (!existingOwner) {
+    await prisma.user.create({
+      data: {
+        email: ownerEmail,
+        username: "owner",
+        password: await hash("owner123", 12),
+        role: "OWNER",
+      },
+    });
+    console.log("Owner user created: owner@chiral.com / owner123");
+  } else {
+    console.log("Owner user already exists");
+  }
+
+  const analystEmail = "analyst@chiral.com";
+  const existingAnalyst = await prisma.user.findUnique({ where: { email: analystEmail } });
+
+  if (!existingAnalyst) {
+    await prisma.user.create({
+      data: {
+        email: analystEmail,
+        username: "analyst",
+        password: await hash("analyst123", 12),
+        role: "DATA_ANALYST",
+      },
+    });
+    console.log("Analyst user created: analyst@chiral.com / analyst123");
+  } else {
+    console.log("Analyst user already exists");
+  }
 }
 
 main()

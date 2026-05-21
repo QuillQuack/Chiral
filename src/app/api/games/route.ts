@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isAdmin } from "@/lib/roles";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -40,6 +41,7 @@ export async function GET(req: Request) {
     tags: JSON.parse(g.tags) as string[],
     rating: g.rating,
     downloadCount: g.downloadCount,
+    scanStatus: g.scanStatus,
     coverData: g.coverData,
     createdAt: g.createdAt.toISOString(),
   }));
@@ -49,12 +51,12 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const session = await auth();
-  if (!session || session.user?.role !== "ADMIN") {
+  if (!session || !isAdmin(session.user?.role || "")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
   try {
-    const { title, description, tags, rating, downloadCount, coverData } =
+    const { title, description, tags, coverData } =
       await req.json();
 
     if (!title || !description) {
@@ -69,8 +71,6 @@ export async function POST(req: Request) {
         title,
         description,
         tags: JSON.stringify(tags || []),
-        rating: typeof rating === "number" ? rating : 0,
-        downloadCount: typeof downloadCount === "number" ? downloadCount : 0,
         coverData: coverData || null,
       },
     });
@@ -83,6 +83,7 @@ export async function POST(req: Request) {
         tags: JSON.parse(game.tags),
         rating: game.rating,
         downloadCount: game.downloadCount,
+        scanStatus: game.scanStatus,
         coverData: game.coverData,
         createdAt: game.createdAt.toISOString(),
       },
