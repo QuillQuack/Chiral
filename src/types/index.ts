@@ -1,11 +1,12 @@
-export interface Game {
+export interface GameData {
   id: string;
   title: string;
   description: string;
   tags: string[];
   rating: number;
   downloadCount: number;
-  gradient: string;
+  coverData: string | null;
+  createdAt: string;
 }
 
 export interface Review {

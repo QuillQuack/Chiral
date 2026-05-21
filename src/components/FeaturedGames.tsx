@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Game } from "@/types";
+import { GameData } from "@/types";
 import GameCard from "./GameCard";
+import Link from "next/link";
 
 export default function FeaturedGames() {
-  const [games, setGames] = useState<Game[]>([]);
+  const [games, setGames] = useState<GameData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/games")
+    fetch("/api/games?sort=trending")
       .then((r) => r.json())
       .then((data) => {
         setGames(data.games);
@@ -35,7 +36,7 @@ export default function FeaturedGames() {
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
                 className="bg-dark-secondary rounded-2xl border border-white/5 overflow-hidden animate-pulse"
@@ -49,9 +50,25 @@ export default function FeaturedGames() {
               </div>
             ))}
           </div>
+        ) : games.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="text-5xl mb-4 opacity-30">📦</div>
+            <p className="text-text-secondary text-lg mb-2">
+              No games uploaded yet
+            </p>
+            <p className="text-text-secondary text-sm mb-6">
+              The library is empty. Someone should probably fix that.
+            </p>
+            <Link
+              href="/admin/games/new"
+              className="inline-block px-6 py-3 rounded-xl font-semibold text-dark-bg bg-gradient-to-r from-accent-pink to-accent-cyan transition-all hover:shadow-[0_0_30px_-5px_rgba(255,79,216,0.4)]"
+            >
+              Upload a Game
+            </Link>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {games.map((game) => (
+            {games.slice(0, 6).map((game) => (
               <GameCard key={game.id} game={game} />
             ))}
           </div>

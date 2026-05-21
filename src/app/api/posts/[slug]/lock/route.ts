@@ -1,0 +1,28 @@
+import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const session = await auth();
+  if (!session || session.user?.role !== "ADMIN") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const { slug } = await params;
+
+  const post = await prisma.post.findUnique({ where: { slug }, select: { id: true, locked: true } });
+  if (!post) {
+    return NextResponse.json({ error: "Post not found" }, { status: 404 });
+  }
+
+  const updated = await prisma.post.update({
+    where: { slug },
+    data: { locked: !post.locked },
+    select: { locked: true },
+  });
+
+  return NextResponse.json({ locked: updated.locked });
+}

@@ -1,25 +1,28 @@
-import { Game } from "@/types";
+import { GameData } from "@/types";
+import Image from "next/image";
 
 interface GameCardProps {
-  game: Game;
+  game: GameData;
 }
 
 export default function GameCard({ game }: GameCardProps) {
   return (
     <div className="group relative bg-dark-secondary rounded-2xl border border-white/5 overflow-hidden transition-all duration-500 hover:border-accent-pink/40 hover:shadow-[0_0_30px_-5px_rgba(255,79,216,0.3)] hover:-translate-y-1">
-      <div
-        className={`relative h-48 bg-gradient-to-br ${game.gradient} flex items-center justify-center overflow-hidden`}
-      >
-        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300" />
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-t from-dark-secondary via-transparent to-transparent" />
-        <div className="relative z-10 text-center">
-          <div className="text-5xl mb-2 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
-            🎮
+      <div className="relative h-48 bg-dark-bg flex items-center justify-center overflow-hidden">
+        {game.coverData ? (
+          <Image
+            src={game.coverData}
+            alt={game.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <div className="text-center">
+            <div className="text-5xl mb-2 opacity-40">🎮</div>
+            <div className="text-white/20 text-xs font-mono">no-cover.exe</div>
           </div>
-          <div className="text-white/40 text-xs font-mono group-hover:text-white/60 transition-colors">
-            {game.id}.exe
-          </div>
-        </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-dark-secondary via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </div>
 
       <div className="p-5">
