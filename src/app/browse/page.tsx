@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { GameData } from "@/types";
 import GameCard from "@/components/GameCard";
+import Navbar from "@/components/Navbar";
 
 const ALL_TAGS = ["Safe Download", "Community Verified", "No Fake Installer", "Popular", "Trending"];
 
@@ -46,8 +47,9 @@ export default function BrowsePage() {
   };
 
   return (
-    <div className="min-h-screen bg-dark-bg pt-24 pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-dark-bg">
+      <Navbar />
+      <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-text-primary mb-2">
             Browse Games

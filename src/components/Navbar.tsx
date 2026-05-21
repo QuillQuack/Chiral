@@ -8,8 +8,7 @@ import NotificationBell from "./NotificationBell";
 const links = [
   { label: "Browse", href: "/browse" },
   { label: "Forums", href: "/forums" },
-  { label: "Top Rated", href: "#top-rated" },
-  { label: "Safety Report", href: "#security" },
+  { label: "Safety Center", href: "/safety" },
 ];
 
 export default function Navbar() {

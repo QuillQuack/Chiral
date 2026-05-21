@@ -21,18 +21,26 @@ model User {
   likes         Like[]
   notifications Notification[] @relation("ReceivedNotifications")
   actedNotifs   Notification[] @relation("ActorNotifications")
+  reports       SafetyReport[] @relation("ReportedBy")
+  reviewedReports SafetyReport[] @relation("ReviewedBy")
 }
 
 model Game {
-  id            String   @id @default(cuid())
+  id            String        @id @default(cuid())
   title         String
   description   String
-  tags          String   @default("[]")
-  rating        Float    @default(0)
-  downloadCount Int      @default(0)
+  tags          String        @default("[]")
+  rating        Float         @default(0)
+  downloadCount Int           @default(0)
   coverData     String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  scanStatus    String        @default("NOT_SCANNED")
+  sha256        String?
+  verifiedAt    DateTime?
+  reportCount   Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  fileScans     FileScan[]
+  reports       SafetyReport[]
 }
 
 model Post {
@@ -49,6 +57,7 @@ model Post {
   comments    Comment[]
   likes       Like[]
   notifications Notification[]
+  reports     SafetyReport[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 }
@@ -97,4 +106,39 @@ model Notification {
   post        Post?    @relation(fields: [postId], references: [id])
   commentId   String?
   comment     Comment? @relation(fields: [commentId], references: [id])
+}
+
+model SafetyReport {
+  id          String   @id @default(cuid())
+  reason      String
+  description String?
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+  reviewedAt  DateTime?
+
+  reporterId String
+  reporter   User   @relation("ReportedBy", fields: [reporterId], references: [id])
+
+  reviewerId String?
+  reviewer   User?  @relation("ReviewedBy", fields: [reviewerId], references: [id])
+
+  gameId String?
+  game   Game?  @relation(fields: [gameId], references: [id])
+
+  postId String?
+  post   Post?  @relation(fields: [postId], references: [id])
+}
+
+model FileScan {
+  id         String    @id @default(cuid())
+  sha256     String
+  fileName   String
+  fileSize   Int?
+  scanStatus String    @default("QUEUED")
+  scanResult String?
+  scannedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  gameId String @unique
+  game   Game   @relation(fields: [gameId], references: [id])
 }
