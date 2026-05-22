@@ -1,21 +1,36 @@
 import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { registerSchema } from "@/lib/validations/auth";
+import { isDisposableEmail } from "@/lib/disposable-email";
+import { enforceRateLimit, recordRateLimit } from "@/lib/rate-limit";
+import { createVerificationToken, sendVerificationEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
-    const { email, username, password } = await req.json();
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.headers.get("x-real-ip") ||
+      "unknown";
 
-    if (!email || !username || !password) {
+    await enforceRateLimit(ip, "register");
+
+    const body = await req.json();
+
+    const parsed = registerSchema.safeParse(body);
+    if (!parsed.success) {
+      const firstError = parsed.error.issues[0];
       return NextResponse.json(
-        { error: "All fields are required" },
+        { error: firstError?.message || "Invalid input" },
         { status: 400 }
       );
     }
 
-    if (password.length < 4) {
+    const { email, username, password } = parsed.data;
+
+    if (isDisposableEmail(email)) {
       return NextResponse.json(
-        { error: "Password must be at least 4 characters" },
+        { error: "Disposable email addresses are not allowed" },
         { status: 400 }
       );
     }
@@ -33,12 +48,23 @@ export async function POST(req: Request) {
 
     const hashed = await hash(password, 12);
 
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: { email, username, password: hashed, role: "USER" },
     });
 
+    await recordRateLimit(ip, "register");
+
+    const token = await createVerificationToken(user.id, email);
+    await sendVerificationEmail(email, token);
+
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (err: unknown) {
+    if (err instanceof Error && "status" in err && (err as { status: number }).status === 429) {
+      return NextResponse.json(
+        { error: err.message },
+        { status: 429 }
+      );
+    }
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

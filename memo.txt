@@ -1,2 +1,35 @@
 docker compose up db -d
 npm run dev
+
+Replace file upload with external download link
+1. Prisma schema — add downloadUrl (String?) to Game model:
+model Game {
+  ...
+  downloadUrl   String?
+  fileName      String?       // kept for backward compat
+  ...
+}
+→ Migrate with prisma db push --accept-data-loss
+2. Admin upload form (src/app/admin/games/new/page.tsx)
+- Remove gameFile state, handleGameFileChange, FileReader logic
+- Add "Download URL" text input (downloadUrl state), placeholder: https://mega.nz/file/...
+- Remove Game File section from the form
+- Simplify submit: POST /api/games → if URL, no scan needed → set scanStatus: "EXTERNAL" → redirect
+- Remove all file-reading, upload, and scan polling code
+- Progress bar becomes: creating (pulse) → done (redirect)
+3. Create endpoint (src/app/api/games/[id]/external/route.ts)  
+Or just handle in existing POST /api/games — add optional downloadUrl field.  
+On submit: if downloadUrl provided, set scanStatus: "EXTERNAL" directly. No scan API needed.
+4. Game detail page (src/app/games/[id]/page.tsx)
+- Download button links to game.downloadUrl if present
+- Fallback to /api/games/[id]/download if downloadUrl is null
+5. GameCard (src/components/GameCard.tsx)
+- Same: links to /games/[id] (existing — no change needed)
+6. Cleanup (optional)
+- private/games/ directory, ClamAV integration, scan API route can stay or be removed
+- SafetyBadge already handles any scanStatus — "EXTERNAL" shows no badge by default, or add a "🔗 External" variant
+Trade-offs discussed
+- File upload removed entirely — no server-side game file hosting, no ClamAV, no storage concerns
+- Admin pastes Mega/Drive/Dropbox link — users redirected to external source
+- scanStatus "EXTERNAL" — quarantines, safety reports, etc. still work on the game entry itself
+- Cover images still upload as base64 (small files, no issue)
