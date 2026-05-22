@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isAdmin } from "@/lib/roles";
 
 export async function GET(
   req: Request,
@@ -54,7 +55,7 @@ export async function PUT(
     return NextResponse.json({ error: "Post not found" }, { status: 404 });
   }
 
-  if (post.authorId !== session.user.id && session.user.role !== "ADMIN") {
+  if (post.authorId !== session.user.id && !isAdmin(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -105,7 +106,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Post not found" }, { status: 404 });
   }
 
-  if (post.authorId !== session.user.id && session.user.role !== "ADMIN") {
+  if (post.authorId !== session.user.id && !isAdmin(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

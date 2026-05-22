@@ -40,4 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# uploaded game files
+/private/games
+
 /src/generated/prisma

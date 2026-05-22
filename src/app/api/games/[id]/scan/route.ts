@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { scanBuffer, generateSha256 } from "@/lib/clamav";
+import { isAdmin } from "@/lib/roles";
+import { writeFileSync, mkdirSync } from "fs";
+import { join } from "path";
+
+const UPLOADS_DIR = join(process.cwd(), "private", "games");
 
 export async function GET(
   req: Request,
@@ -36,7 +41,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session || session.user?.role !== "ADMIN") {
+  if (!session || !isAdmin(session.user?.role || "")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -57,13 +62,17 @@ export async function POST(
     const buffer = Buffer.from(fileData, "base64");
     const sha256 = generateSha256(buffer);
 
-    const scan: { id: string; sha256: string; fileName: string; fileSize: number | null; scanStatus: string; scanResult: unknown; scannedAt: Date | null; createdAt: Date } = await prisma.$transaction(async (tx) => {
+    const gameDir = join(UPLOADS_DIR, id);
+    mkdirSync(gameDir, { recursive: true });
+    writeFileSync(join(gameDir, fileName), buffer);
+
+    const fileScan = await prisma.$transaction(async (tx) => {
       const existing = await tx.fileScan.findUnique({ where: { gameId: id } });
       if (existing) {
         await tx.fileScan.delete({ where: { id: existing.id } });
       }
 
-      const created = await tx.fileScan.create({
+      return tx.fileScan.create({
         data: {
           sha256,
           fileName,
@@ -72,60 +81,75 @@ export async function POST(
           gameId: id,
         },
       });
-
-      await tx.fileScan.update({
-        where: { id: created.id },
-        data: { scanStatus: "SCANNING" },
-      });
-
-      let scanStatus = "ERROR";
-      let scanResult: unknown = null;
-      let scannedAt: Date | null = null;
-
-      try {
-        const result = await scanBuffer(buffer, fileName);
-        scanStatus = result.status;
-        scanResult = result.details ? { engine: "ClamAV", details: result.details } : null;
-        scannedAt = new Date();
-      } catch {
-        scanStatus = "ERROR";
-        scanResult = { engine: "ClamAV", error: "Scan failed" };
-        scannedAt = new Date();
-      }
-
-      const updated = await tx.fileScan.update({
-        where: { id: created.id },
-        data: {
-          scanStatus,
-          scanResult: scanResult ? JSON.stringify(scanResult) : null,
-          scannedAt,
-        },
-      });
-
-      await tx.game.update({
-        where: { id },
-        data: {
-          scanStatus,
-          sha256,
-          verifiedAt: scanStatus === "CLEAN" ? new Date() : null,
-        },
-      });
-
-      return updated;
     });
 
-    return NextResponse.json({
+    await prisma.game.update({
+      where: { id },
+      data: { fileName, sha256, scanStatus: "QUEUED" },
+    });
+
+    const res = NextResponse.json({
       scan: {
-        id: scan.id,
-        sha256: scan.sha256,
-        fileName: scan.fileName,
-        fileSize: scan.fileSize,
-        scanStatus: scan.scanStatus,
-        scanResult: scan.scanResult ? JSON.parse(scan.scanResult as string) : null,
-        scannedAt: scan.scannedAt?.toISOString() || null,
-        createdAt: scan.createdAt.toISOString(),
+        id: fileScan.id,
+        sha256: fileScan.sha256,
+        fileName: fileScan.fileName,
+        fileSize: fileScan.fileSize,
+        scanStatus: fileScan.scanStatus,
+        scanResult: null,
+        scannedAt: null,
+        createdAt: fileScan.createdAt.toISOString(),
       },
     });
+
+    (async () => {
+      try {
+        await prisma.fileScan.update({
+          where: { id: fileScan.id },
+          data: { scanStatus: "SCANNING" },
+        });
+
+        const result = await scanBuffer(buffer, fileName);
+
+        await prisma.$transaction(async (tx) => {
+          await tx.fileScan.update({
+            where: { id: fileScan.id },
+            data: {
+              scanStatus: result.status,
+              scanResult: result.details
+                ? JSON.stringify({ engine: "ClamAV", details: result.details })
+                : null,
+              scannedAt: new Date(),
+            },
+          });
+
+          await tx.game.update({
+            where: { id },
+            data: {
+              scanStatus: result.status,
+              verifiedAt: result.status === "CLEAN" ? new Date() : null,
+            },
+          });
+        });
+      } catch {
+        await prisma.$transaction(async (tx) => {
+          await tx.fileScan.update({
+            where: { id: fileScan.id },
+            data: {
+              scanStatus: "ERROR",
+              scanResult: JSON.stringify({ engine: "ClamAV", error: "Scan failed" }),
+              scannedAt: new Date(),
+            },
+          });
+
+          await tx.game.update({
+            where: { id },
+            data: { scanStatus: "ERROR" },
+          });
+        });
+      }
+    })();
+
+    return res;
   } catch {
     return NextResponse.json({ error: "Failed to scan file" }, { status: 500 });
   }

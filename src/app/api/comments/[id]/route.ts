@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isAdmin } from "@/lib/roles";
 
 export async function PUT(
   req: Request,
@@ -86,7 +87,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Comment not found" }, { status: 404 });
   }
 
-  if (comment.authorId !== session.user.id && session.user.role !== "ADMIN") {
+  if (comment.authorId !== session.user.id && !isAdmin(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

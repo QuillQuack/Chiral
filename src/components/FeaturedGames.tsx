@@ -11,9 +11,13 @@ export default function FeaturedGames() {
 
   useEffect(() => {
     fetch("/api/games?sort=trending")
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : { games: [] }))
       .then((data) => {
-        setGames(data.games);
+        setGames(data.games || []);
+        setLoading(false);
+      })
+      .catch(() => {
+        setGames([]);
         setLoading(false);
       });
   }, []);

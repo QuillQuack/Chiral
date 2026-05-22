@@ -28,7 +28,7 @@ export default function AdminPage() {
       router.push("/login");
       return;
     }
-    if (status === "authenticated" && !isAdmin(session?.user?.role || "")) {
+    if (status === "authenticated" && session?.user?.role !== "OWNER") {
       router.push("/");
       return;
     }
@@ -110,9 +110,9 @@ export default function AdminPage() {
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-text-primary">Admin Panel</h1>
+            <h1 className="text-3xl font-bold text-text-primary">Employee Manager</h1>
             <p className="text-text-secondary text-sm mt-1">
-              Total users: {users.length} (and counting, somehow)
+              {users.length} employee{users.length !== 1 ? "s" : ""} on payroll
             </p>
           </div>
           <Link
@@ -253,7 +253,7 @@ export default function AdminPage() {
 
         <p className="text-text-secondary/40 text-xs text-center mt-4">
           Error 403: Your clearance level is &ldquo;Intern&rdquo;. Oh wait,
-          you&apos;re admin. Never mind.
+          you&apos;re the owner. Carry on.
         </p>
       </div>
     </div>

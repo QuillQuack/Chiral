@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import NotificationBell from "./NotificationBell";
+import { isAdmin, canViewAnalytics } from "@/lib/roles";
 
 const links = [
   { label: "Browse", href: "/browse" },
@@ -51,6 +52,33 @@ export default function Navbar() {
                   {link.label}
                 </a>
               ))}
+              {session && (session.user?.role === "OWNER" || isAdmin(session.user?.role || "")) && (
+                <span className="w-px h-4 bg-white/10" />
+              )}
+              {session && session.user?.role === "OWNER" && (
+                <a
+                  href="/admin"
+                  className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium"
+                >
+                  Employees
+                </a>
+              )}
+              {session && isAdmin(session.user?.role || "") && (
+                <a
+                  href="/admin/games"
+                  className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium"
+                >
+                  Games
+                </a>
+              )}
+              {session && canViewAnalytics(session.user?.role || "") && (
+                <a
+                  href="/admin/analytics"
+                  className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium"
+                >
+                  Analytics
+                </a>
+              )}
             </div>
           </div>
 
@@ -106,6 +134,36 @@ export default function Navbar() {
                 {link.label}
               </a>
             ))}
+            {session && (session.user?.role === "OWNER" || isAdmin(session.user?.role || "")) && (
+              <div className="border-t border-white/5 my-2 pt-2" />
+            )}
+            {session && session.user?.role === "OWNER" && (
+              <a
+                href="/admin"
+                className="block py-2 text-text-secondary hover:text-text-primary transition-colors text-sm"
+                onClick={() => setMobileOpen(false)}
+              >
+                Employees
+              </a>
+            )}
+            {session && isAdmin(session.user?.role || "") && (
+              <a
+                href="/admin/games"
+                className="block py-2 text-text-secondary hover:text-text-primary transition-colors text-sm"
+                onClick={() => setMobileOpen(false)}
+              >
+                Games
+              </a>
+            )}
+            {session && canViewAnalytics(session.user?.role || "") && (
+              <a
+                href="/admin/analytics"
+                className="block py-2 text-text-secondary hover:text-text-primary transition-colors text-sm"
+                onClick={() => setMobileOpen(false)}
+              >
+                Analytics
+              </a>
+            )}
           </div>
         )}
       </div>

@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { GameData } from "@/types";
 import Image from "next/image";
+import Link from "next/link";
 import SafetyBadge from "./SafetyBadge";
 import ReportModal from "./ReportModal";
+import { GameData } from "@/types";
 
 const TAG_COLORS = [
   "bg-accent-pink/10 text-accent-pink border-accent-pink/20",
@@ -86,9 +87,12 @@ export default function GameCard({ game }: GameCardProps) {
               >
                 Report
               </button>
-              <button className="text-xs font-medium text-accent-cyan hover:text-accent-pink transition-colors">
+              <Link
+                href={`/games/${game.id}`}
+                className="text-xs font-medium text-accent-cyan hover:text-accent-pink transition-colors"
+              >
                 Download →
-              </button>
+              </Link>
             </div>
           </div>
         </div>

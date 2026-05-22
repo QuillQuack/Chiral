@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { canViewAnalytics } from "@/lib/roles";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
@@ -25,6 +26,10 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
+    if (status === "authenticated" && !canViewAnalytics(session?.user?.role || "")) {
+      router.push("/");
+      return;
+    }
     if (status === "authenticated") {
       fetch("/api/admin/analytics")
         .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
@@ -36,7 +41,7 @@ export default function AnalyticsPage() {
         .catch(() => {})
         .finally(() => setLoading(false));
     }
-  }, [status, router]);
+  }, [status, session, router]);
 
   if (status === "loading" || loading) {
     return (
@@ -44,6 +49,11 @@ export default function AnalyticsPage() {
         <div className="w-8 h-8 border-2 border-accent-pink border-t-transparent rounded-full animate-spin" />
       </div>
     );
+  }
+
+  if (status === "authenticated" && !canViewAnalytics(session?.user?.role || "")) {
+    router.push("/");
+    return null;
   }
 
   const avgDaily = days.length > 0 ? Math.round((total / days.length) * 10) / 10 : 0;

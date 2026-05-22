@@ -35,6 +35,7 @@ model Game {
   coverData     String?
   scanStatus    String        @default("NOT_SCANNED")
   sha256        String?
+  fileName      String?
   verifiedAt    DateTime?
   reportCount   Int           @default(0)
   createdAt     DateTime      @default(now())

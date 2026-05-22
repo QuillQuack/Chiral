@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { GameData } from "@/types";
 import { isAdmin } from "@/lib/roles";
+import SafetyBadge from "@/components/SafetyBadge";
 
 export default function AdminGamesPage() {
   const { data: session, status } = useSession();
@@ -146,6 +147,7 @@ export default function AdminGamesPage() {
                 <tr className="border-b border-white/5">
                   <th className="text-left px-6 py-4 text-text-secondary font-medium">Title</th>
                   <th className="text-left px-6 py-4 text-text-secondary font-medium">Tags</th>
+                  <th className="text-left px-6 py-4 text-text-secondary font-medium">Status</th>
                   <th className="text-right px-6 py-4 text-text-secondary font-medium">Actions</th>
                 </tr>
               </thead>
@@ -169,6 +171,7 @@ export default function AdminGamesPage() {
                             placeholder="comma, separated"
                           />
                         </td>
+                        <td className="px-6 py-4" />
                         <td className="px-6 py-4 text-right space-x-2">
                           <button onClick={() => handleSave(game.id)} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20">Save</button>
                           <button onClick={() => setEditingId(null)} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 text-text-secondary hover:text-text-primary">Cancel</button>
@@ -176,13 +179,23 @@ export default function AdminGamesPage() {
                       </>
                     ) : (
                       <>
-                        <td className="px-6 py-4 text-text-primary font-medium">{game.title}</td>
+                        <td className="px-6 py-4">
+                          <button
+                            onClick={() => handleEdit(game)}
+                            className="text-text-primary font-medium hover:text-accent-cyan transition-colors text-left"
+                          >
+                            {game.title}
+                          </button>
+                        </td>
                         <td className="px-6 py-4">
                           <div className="flex flex-wrap gap-1">
                             {game.tags.map((tag) => (
                               <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-text-secondary">{tag}</span>
                             ))}
                           </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <SafetyBadge status={game.scanStatus} size="sm" />
                         </td>
                         <td className="px-6 py-4 text-right space-x-2">
                           <button onClick={() => handleEdit(game)} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-accent-cyan/10 text-accent-cyan hover:bg-accent-cyan/20">Edit</button>

@@ -1,12 +1,13 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
+import { isAdmin, canViewAnalytics } from "@/lib/roles";
 
 export default async function middleware(req: Request) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   const { pathname } = new URL(req.url);
 
   const isLoggedIn = !!token;
-  const isAdmin = token?.role === "ADMIN";
+  const role = token?.role || "";
 
   if (pathname.startsWith("/login") || pathname.startsWith("/register")) {
     if (isLoggedIn) {
@@ -22,7 +23,12 @@ export default async function middleware(req: Request) {
     return;
   }
 
-  if (pathname.startsWith("/admin") && !isAdmin) {
+  if (
+    (pathname === "/admin" && role !== "OWNER") ||
+    (pathname.startsWith("/admin/games") && !isAdmin(role)) ||
+    (pathname.startsWith("/admin/analytics") && !canViewAnalytics(role)) ||
+    (pathname.startsWith("/admin") && pathname !== "/admin" && !pathname.startsWith("/admin/games") && !pathname.startsWith("/admin/analytics") && role !== "OWNER")
+  ) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 }
