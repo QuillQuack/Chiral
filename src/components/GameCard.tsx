@@ -25,7 +25,10 @@ export default function GameCard({ game }: GameCardProps) {
 
   return (
     <>
-      <div className="group relative bg-dark-secondary rounded-2xl border border-white/5 overflow-hidden transition-all duration-500 hover:border-accent-pink/40 hover:shadow-[0_0_30px_-5px_rgba(255,79,216,0.3)] hover:-translate-y-1">
+      <Link
+        href={`/games/${game.slug || game.id}`}
+        className="block group relative bg-dark-secondary rounded-2xl border border-white/5 overflow-hidden transition-all duration-500 hover:border-accent-pink/40 hover:shadow-[0_0_30px_-5px_rgba(255,79,216,0.3)] hover:-translate-y-1"
+      >
         <div className="relative h-48 bg-dark-bg flex items-center justify-center overflow-hidden">
           {game.coverData ? (
             <Image
@@ -80,23 +83,19 @@ export default function GameCard({ game }: GameCardProps) {
             <span className="text-text-secondary text-xs">
               {(game.downloadCount / 1000).toFixed(1)}k downloads
             </span>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setReportOpen(true)}
-                className="text-xs text-text-secondary hover:text-red-400 transition-colors"
-              >
-                Report
-              </button>
-              <Link
-                href={`/games/${game.id}`}
-                className="text-xs font-medium text-accent-cyan hover:text-accent-pink transition-colors"
-              >
-                Download →
-              </Link>
-            </div>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setReportOpen(true);
+              }}
+              className="text-xs text-text-secondary hover:text-red-400 transition-colors"
+            >
+              Report
+            </button>
           </div>
         </div>
-      </div>
+      </Link>
 
       <ReportModal
         open={reportOpen}

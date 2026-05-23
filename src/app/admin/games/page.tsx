@@ -198,7 +198,7 @@ export default function AdminGamesPage() {
                           <SafetyBadge status={game.scanStatus} size="sm" />
                         </td>
                         <td className="px-6 py-4 text-right space-x-2">
-                          <button onClick={() => handleEdit(game)} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-accent-cyan/10 text-accent-cyan hover:bg-accent-cyan/20">Edit</button>
+                          <Link href={`/admin/games/${game.id}`} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-accent-cyan/10 text-accent-cyan hover:bg-accent-cyan/20 transition-colors inline-block">Edit</Link>
                           <button onClick={() => handleDelete(game.id, game.title)} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20">Delete</button>
                         </td>
                       </>

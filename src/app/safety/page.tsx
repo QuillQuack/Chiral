@@ -61,25 +61,6 @@ export default function SafetyPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
             <Link
-              href="/safety/file"
-              className="bg-dark-secondary rounded-2xl border border-white/5 p-6 hover:border-accent-cyan/20 transition-all group"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <span className="w-10 h-10 rounded-xl bg-accent-cyan/10 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-accent-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                </span>
-                <div>
-                  <h3 className="text-sm font-semibold text-text-primary group-hover:text-accent-cyan transition-colors">
-                    File Lookup
-                  </h3>
-                  <p className="text-xs text-text-secondary">Check scan results by game or SHA-256</p>
-                </div>
-              </div>
-            </Link>
-
-            <Link
               href="/safety/reports"
               className="bg-dark-secondary rounded-2xl border border-white/5 p-6 hover:border-accent-cyan/20 transition-all group"
             >
@@ -103,8 +84,8 @@ export default function SafetyPage() {
             <h2 className="text-sm font-semibold text-text-primary mb-4">About Safety Center</h2>
             <div className="space-y-3 text-sm text-text-secondary leading-relaxed">
               <p>
-                Every file uploaded to Chiral Downloads is scanned using <span className="text-accent-cyan">ClamAV</span> antivirus engine. 
-                Scan results, SHA-256 checksums, and community reports are publicly visible.
+                Every game on Chiral Downloads includes SHA-256 checksums and MEGA download mirrors 
+                for community verification. Community reports and moderation history are publicly visible.
               </p>
               <p>
                 If you encounter suspicious content, use the <span className="text-accent-pink">Report</span> button on any game or forum post. 

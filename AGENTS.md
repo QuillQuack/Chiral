@@ -30,6 +30,9 @@ Satirical dark-mode website with cyberpunk/SaaS aesthetic.
 - **Components**: `src/components/PascalCase.tsx` — default export
 - **Data**: `src/data/kebab-case.ts` — named exports
 - **API routes**: `src/app/api/[route]/route.ts` — Next.js App Router
+  - Game single API supports dual lookup: slug OR cuid ID
+- **Game routes**: `/games/[slug]` — slug-based (not numeric IDs)
+- **Screenshots**: Uploaded to `public/uploads/games/{gameId}/screenshots/{uuid}.{ext}`, max 10, image types only
 - **Types**: `src/types/index.ts` — all shared interfaces
 - **Auth types**: `src/types/next-auth.d.ts` — Session/User augmentation
 - **Prisma client**: `src/generated/prisma/client` (auto-generated, do not edit)

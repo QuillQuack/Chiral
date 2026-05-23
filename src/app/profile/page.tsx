@@ -213,7 +213,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-dark-bg pt-24 pb-16 px-4">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-[640px] mx-auto">
         <div className="bg-dark-secondary rounded-2xl border border-white/5 p-8">
           <div className="flex items-center gap-6 mb-8">
             <div className="relative shrink-0">
@@ -246,7 +246,7 @@ export default function ProfilePage() {
                 />
               </label>
               {avatarPreview && (
-                <div className="absolute -bottom-1 -right-1 flex gap-1">
+                <div className="absolute -top-1 -right-1 flex gap-1">
                   <button
                     onClick={handleAvatarSave}
                     disabled={avatarSaving}
@@ -269,7 +269,7 @@ export default function ProfilePage() {
                 <button
                   onClick={handleAvatarRemove}
                   disabled={avatarSaving}
-                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-red-500/80 flex items-center justify-center text-white text-xs hover:bg-red-400 transition-colors disabled:opacity-50"
+                  className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-red-500/80 flex items-center justify-center text-white text-xs hover:bg-red-400 transition-colors disabled:opacity-50"
                   title="Remove avatar"
                 >
                   ✕
@@ -279,52 +279,55 @@ export default function ProfilePage() {
 
             <div className="min-w-0 flex-1">
               {usernameEditing ? (
-                <div className="space-y-2">
+                <div className="flex items-center gap-2">
                   <input
                     value={usernameDraft}
                     onChange={(e) => setUsernameDraft(e.target.value)}
                     maxLength={30}
                     disabled={usernameSaving}
-                    className="w-full bg-dark-bg border border-white/10 rounded-xl px-4 py-2 text-text-primary placeholder:text-text-secondary/40 focus:outline-none focus:border-accent-cyan/50 text-xl font-bold"
+                    className="flex-1 bg-dark-bg border border-white/10 rounded-xl px-4 py-[2px] text-text-primary placeholder:text-text-secondary/40 focus:outline-none focus:border-accent-cyan/50 text-xl font-bold"
                     placeholder="Your username"
                   />
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setUsernameEditing(false)}
-                      disabled={usernameSaving}
-                      className="px-3 py-1.5 rounded-lg text-xs font-medium text-text-secondary bg-white/5 border border-white/10 hover:border-white/20 transition-all disabled:opacity-50"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleUsernameSave}
-                      disabled={usernameSaving}
-                      className="px-3 py-1.5 rounded-lg text-xs font-medium text-dark-bg bg-gradient-to-r from-accent-pink to-accent-cyan transition-all hover:shadow-[0_0_20px_-5px_rgba(255,79,216,0.4)] disabled:opacity-50"
-                    >
-                      {usernameSaving ? "Saving..." : "Save"}
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => setUsernameEditing(false)}
+                    disabled={usernameSaving}
+                    className="px-3 py-2 rounded-lg text-xs font-medium text-text-secondary bg-white/5 border border-white/10 hover:border-white/20 transition-all disabled:opacity-50 shrink-0"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleUsernameSave}
+                    disabled={usernameSaving}
+                    className="px-3 py-2 rounded-lg text-xs font-medium text-dark-bg bg-gradient-to-r from-accent-pink to-accent-cyan transition-all hover:shadow-[0_0_20px_-5px_rgba(255,79,216,0.4)] disabled:opacity-50 shrink-0"
+                  >
+                    {usernameSaving ? "Saving..." : "Save"}
+                  </button>
                   {usernameError && (
                     <p className="text-xs text-red-400">{usernameError}</p>
                   )}
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between">
                   <h1 className="text-2xl font-bold text-text-primary truncate">
                     {session.user.name}
                   </h1>
                   <button
                     onClick={handleStartUsernameEdit}
-                    className="text-xs text-accent-cyan hover:text-accent-pink transition-colors shrink-0"
+                    className="text-text-secondary hover:text-accent-pink transition-colors shrink-0 ml-2"
+                    title="Edit username"
                   >
-                    Edit
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
                   </button>
                 </div>
               )}
-              <p className="text-text-secondary text-sm truncate">{session.user.email}</p>
-              <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent-pink/10 text-accent-pink border border-accent-pink/20">
-                {session.user.role}
-              </span>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-text-secondary text-sm truncate">{session.user.email}</p>
+                <span className="shrink-0 px-2 py-0.5 rounded-full text-xs font-medium bg-accent-pink/10 text-accent-pink border border-accent-pink/20">
+                  {session.user.role}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -335,7 +338,7 @@ export default function ProfilePage() {
           )}
 
           <div className="mb-8">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-medium text-text-secondary">Bio</h2>
               {!bioEditing && (
                 <button
@@ -402,7 +405,9 @@ export default function ProfilePage() {
               </div>
             ) : (
               <>
-                <BioDisplay bio={currentBio} />
+                <div className="mt-4">
+                  <BioDisplay bio={currentBio} />
+                </div>
                 {bioMsg === "success" && (
                   <div className="mt-3 bg-green-500/10 border border-green-500/20 text-green-400 text-sm rounded-xl px-4 py-3">
                     Bio updated successfully
@@ -433,7 +438,7 @@ export default function ProfilePage() {
             ))}
           </div>
 
-          <div className="border-t border-white/5 pt-6 space-y-4">
+          <div className="border-t border-white/5 pt-8 space-y-4">
             <Link
               href="/"
               className="block w-full py-3 text-center rounded-xl text-text-primary bg-white/5 border border-white/10 hover:border-accent-cyan/30 transition-all text-sm font-medium"

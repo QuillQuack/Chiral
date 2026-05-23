@@ -12,11 +12,27 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const { email, username } = await req.json();
+  const { email, username, role } = await req.json();
 
   if (!email || !username) {
     return NextResponse.json(
       { error: "Email and username are required" },
+      { status: 400 }
+    );
+  }
+
+  const VALID_ROLES = ["USER", "ADMIN", "DATA_ANALYST", "OWNER"];
+
+  if (role && !VALID_ROLES.includes(role)) {
+    return NextResponse.json(
+      { error: "Invalid role" },
+      { status: 400 }
+    );
+  }
+
+  if (role && id === session.user.id) {
+    return NextResponse.json(
+      { error: "Cannot change your own role" },
       { status: 400 }
     );
   }
@@ -32,9 +48,12 @@ export async function PUT(
     );
   }
 
+  const updateData: Record<string, string> = { email, username };
+  if (role) updateData.role = role;
+
   const user = await prisma.user.update({
     where: { id },
-    data: { email, username },
+    data: updateData,
     select: {
       id: true,
       email: true,

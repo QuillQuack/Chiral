@@ -2,6 +2,59 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/roles";
+import { generateSlug } from "@/lib/slug";
+import { updateGameSchema } from "@/lib/validations/game";
+
+async function findGame(identifier: string) {
+  return prisma.game.findFirst({
+    where: {
+      OR: [{ slug: identifier }, { id: identifier }],
+    },
+    include: {
+      author: { select: { id: true, username: true, image: true } },
+      screenshots: { orderBy: { createdAt: "asc" } },
+      mirrors: { orderBy: { createdAt: "asc" } },
+    },
+  });
+}
+
+function serializeGame(game: any) {
+  return {
+    id: game.id,
+    slug: game.slug,
+    title: game.title,
+    shortSummary: game.shortSummary,
+    description: game.description,
+    tags: JSON.parse(game.tags) as string[],
+    rating: game.rating,
+    downloadCount: game.downloadCount,
+    coverData: game.coverData,
+    scanStatus: game.scanStatus,
+    sha256: game.sha256,
+    verifiedAt: game.verifiedAt?.toISOString() || null,
+    releaseDate: game.releaseDate?.toISOString() || null,
+    systemRequirements: game.systemRequirements ? JSON.parse(game.systemRequirements) : null,
+    reportCount: game.reportCount,
+    createdAt: game.createdAt.toISOString(),
+    author: game.author
+      ? { id: game.author.id, username: game.author.username, image: game.author.image }
+      : null,
+    screenshots: game.screenshots.map((s: any) => ({
+      id: s.id,
+      imageUrl: s.imageUrl,
+      createdAt: s.createdAt.toISOString(),
+    })),
+    mirrors: game.mirrors.map((m: any) => ({
+      id: m.id,
+      provider: m.provider,
+      url: m.url,
+      fileSize: m.fileSize,
+      verifiedAt: m.verifiedAt?.toISOString() || null,
+      isOfficial: m.isOfficial,
+      createdAt: m.createdAt.toISOString(),
+    })),
+  };
+}
 
 export async function GET(
   req: Request,
@@ -9,27 +62,13 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-
-    const game = await prisma.game.findUnique({ where: { id } });
+    const game = await findGame(id);
 
     if (!game) {
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
 
-    return NextResponse.json({
-      game: {
-        id: game.id,
-        title: game.title,
-        description: game.description,
-        tags: JSON.parse(game.tags),
-        rating: game.rating,
-        downloadCount: game.downloadCount,
-        coverData: game.coverData,
-        scanStatus: game.scanStatus,
-        sha256: game.sha256,
-        createdAt: game.createdAt.toISOString(),
-      },
-    });
+    return NextResponse.json({ game: serializeGame(game) });
   } catch {
     return NextResponse.json({ error: "Failed to fetch game" }, { status: 500 });
   }
@@ -46,31 +85,51 @@ export async function PUT(
 
   try {
     const { id } = await params;
-    const { title, description, tags, coverData } =
-      await req.json();
+    const body = await req.json();
+    const parsed = updateGameSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || "Invalid input" },
+        { status: 400 }
+      );
+    }
+
+    const data: any = {};
+    if (parsed.data.title !== undefined) {
+      data.title = parsed.data.title;
+      const existingSlugs = (await prisma.game.findMany({
+        where: { id: { not: id } },
+        select: { slug: true },
+      })).map((g) => g.slug);
+      data.slug = generateSlug(parsed.data.title, existingSlugs);
+    }
+    if (parsed.data.shortSummary !== undefined) data.shortSummary = parsed.data.shortSummary;
+    if (parsed.data.description !== undefined) data.description = parsed.data.description;
+    if (parsed.data.tags !== undefined) data.tags = JSON.stringify(parsed.data.tags);
+    if (parsed.data.coverData !== undefined) data.coverData = parsed.data.coverData;
+    if (parsed.data.releaseDate !== undefined) {
+      data.releaseDate = parsed.data.releaseDate ? new Date(parsed.data.releaseDate) : null;
+    }
+    if (parsed.data.systemRequirements !== undefined) {
+      data.systemRequirements = parsed.data.systemRequirements
+        ? JSON.stringify(parsed.data.systemRequirements)
+        : null;
+    }
+    if (parsed.data.scanStatus !== undefined) {
+      data.scanStatus = parsed.data.scanStatus;
+    }
 
     const game = await prisma.game.update({
       where: { id },
-      data: {
-        title,
-        description,
-        tags: JSON.stringify(tags || []),
-        coverData: coverData ?? undefined,
+      data,
+      include: {
+        author: { select: { id: true, username: true, image: true } },
+        screenshots: { orderBy: { createdAt: "asc" } },
+        mirrors: { orderBy: { createdAt: "asc" } },
       },
     });
 
-    return NextResponse.json({
-      game: {
-        id: game.id,
-        title: game.title,
-        description: game.description,
-        tags: JSON.parse(game.tags),
-        rating: game.rating,
-        downloadCount: game.downloadCount,
-        coverData: game.coverData,
-        createdAt: game.createdAt.toISOString(),
-      },
-    });
+    return NextResponse.json({ game: serializeGame(game) });
   } catch {
     return NextResponse.json(
       { error: "Failed to update game" },

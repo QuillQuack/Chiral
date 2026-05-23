@@ -20,7 +20,7 @@ export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ email: "", username: "" });
+  const [editForm, setEditForm] = useState({ email: "", username: "", role: "" });
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
@@ -46,15 +46,20 @@ export default function AdminPage() {
 
   const handleEdit = (user: User) => {
     setEditingId(user.id);
-    setEditForm({ email: user.email, username: user.username });
+    setEditForm({ email: user.email, username: user.username, role: user.role });
   };
 
   const handleSave = async (id: string) => {
+    const original = users.find((u) => u.id === id);
     try {
       const res = await fetch(`/api/admin/users/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editForm),
+        body: JSON.stringify({
+          email: editForm.email,
+          username: editForm.username,
+          role: original && editForm.role !== original.role ? editForm.role : undefined,
+        }),
       });
 
       if (!res.ok) {
@@ -180,9 +185,18 @@ export default function AdminPage() {
                           />
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-text-secondary text-xs bg-white/5 px-2 py-1 rounded-full">
-                            {user.role}
-                          </span>
+                          <select
+                            value={editForm.role}
+                            onChange={(e) =>
+                              setEditForm((f) => ({ ...f, role: e.target.value }))
+                            }
+                            className="bg-dark-bg border border-white/10 rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent-cyan/50"
+                          >
+                            <option value="USER">USER</option>
+                            <option value="ADMIN">ADMIN</option>
+                            <option value="DATA_ANALYST">DATA_ANALYST</option>
+                            <option value="OWNER">OWNER</option>
+                          </select>
                         </td>
                         <td className="px-6 py-4 text-text-secondary">
                           {new Date(user.createdAt).toLocaleDateString()}
@@ -210,10 +224,14 @@ export default function AdminPage() {
                         <td className="px-6 py-4 text-text-secondary">{user.email}</td>
                         <td className="px-6 py-4">
                           <span
-                            className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                              user.role === "ADMIN"
-                                ? "bg-accent-pink/10 text-accent-pink border border-accent-pink/20"
-                                : "bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/20"
+                            className={`text-xs px-2.5 py-1 rounded-full font-medium border ${
+                              user.role === "OWNER"
+                                ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
+                                : user.role === "ADMIN"
+                                ? "bg-accent-pink/10 text-accent-pink border-accent-pink/20"
+                                : user.role === "DATA_ANALYST"
+                                ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                                : "bg-accent-cyan/10 text-accent-cyan border-accent-cyan/20"
                             }`}
                           >
                             {user.role}

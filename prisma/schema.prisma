@@ -28,6 +28,7 @@ model User {
   actedNotifs       Notification[] @relation("ActorNotifications")
   reports           SafetyReport[] @relation("ReportedBy")
   reviewedReports   SafetyReport[] @relation("ReviewedBy")
+  games             Game[]
   accounts          Account[]
   sessions          Session[]
 }
@@ -76,22 +77,48 @@ model RateLimit {
 }
 
 model Game {
-  id            String        @id @default(cuid())
-  title         String
-  description   String
-  tags          String        @default("[]")
-  rating        Float         @default(0)
-  downloadCount Int           @default(0)
-  coverData     String?
-  scanStatus    String        @default("NOT_SCANNED")
-  sha256        String?
-  fileName      String?
-  verifiedAt    DateTime?
-  reportCount   Int           @default(0)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  fileScans     FileScan[]
-  reports       SafetyReport[]
+  id                 String        @id @default(cuid())
+  slug               String        @unique
+  title              String
+  shortSummary       String?
+  description        String
+  tags               String        @default("[]")
+  rating             Float         @default(0)
+  downloadCount      Int           @default(0)
+  coverData          String?
+  scanStatus         String        @default("NOT_SCANNED")
+  sha256             String?
+  verifiedAt         DateTime?
+  reportCount        Int           @default(0)
+  releaseDate        DateTime?
+  systemRequirements String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  authorId           String?
+  author             User?         @relation(fields: [authorId], references: [id])
+  reports            SafetyReport[]
+  screenshots        GameScreenshot[]
+  mirrors            DownloadMirror[]
+}
+
+model GameScreenshot {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model DownloadMirror {
+  id         String    @id @default(cuid())
+  provider   String
+  url        String
+  fileSize   String?
+  verifiedAt DateTime?
+  isOfficial Boolean   @default(false)
+  gameId     String
+  game       Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
 }
 
 model Post {
@@ -178,20 +205,6 @@ model SafetyReport {
 
   postId String?
   post   Post?  @relation(fields: [postId], references: [id])
-}
-
-model FileScan {
-  id         String    @id @default(cuid())
-  sha256     String
-  fileName   String
-  fileSize   Int?
-  scanStatus String    @default("QUEUED")
-  scanResult String?
-  scannedAt  DateTime?
-  createdAt  DateTime  @default(now())
-
-  gameId String @unique
-  game   Game   @relation(fields: [gameId], references: [id])
 }
 
 model PageVisit {

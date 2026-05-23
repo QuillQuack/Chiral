@@ -1,6 +1,8 @@
 export interface GameData {
   id: string;
+  slug: string;
   title: string;
+  shortSummary: string | null;
   description: string;
   tags: string[];
   rating: number;
@@ -8,6 +10,37 @@ export interface GameData {
   coverData: string | null;
   scanStatus: string;
   sha256: string | null;
+  verifiedAt: string | null;
+  releaseDate: string | null;
+  systemRequirements: SystemRequirements | null;
+  reportCount: number;
+  createdAt: string;
+  author: { id: string; username: string; image: string | null } | null;
+  screenshots?: GameScreenshot[];
+  mirrors?: DownloadMirror[];
+}
+
+export interface SystemRequirements {
+  os: string | null;
+  ram: string | null;
+  gpu: string | null;
+  storage: string | null;
+  processor: string | null;
+}
+
+export interface GameScreenshot {
+  id: string;
+  imageUrl: string;
+  createdAt: string;
+}
+
+export interface DownloadMirror {
+  id: string;
+  provider: string;
+  url: string;
+  fileSize: string | null;
+  verifiedAt: string | null;
+  isOfficial: boolean;
   createdAt: string;
 }
 
@@ -31,17 +64,6 @@ export interface SafetyReportData {
   reviewer: { id: string; username: string } | null;
   gameId: string | null;
   postId: string | null;
-}
-
-export interface FileScanData {
-  id: string;
-  sha256: string;
-  fileName: string;
-  fileSize: number | null;
-  scanStatus: string;
-  scanResult: string | null;
-  scannedAt: string | null;
-  createdAt: string;
 }
 
 export const REPORT_REASONS = [
